@@ -8,7 +8,7 @@ import ga
 num_individuals = 8
 
 # Generations count.
-num_generations = 5
+num_generations = 2000000
 
 # Number of the weights to optimize.
 num_weights = 2
@@ -17,11 +17,11 @@ num_weights = 2
 num_parents_mating = int(num_individuals / 2)
 
 # Mutation odds
-mutation_chance = 100
+mutation_chance = 5
 
 # Generate first population
 pop_size = (num_individuals, num_weights)
-new_population = np.random.uniform(low=-10.0, high=10.0, size=pop_size)
+start_population = np.random.uniform(low=-10.0, high=10.0, size=pop_size)
 
 # Sort self.indiv_fits in descending order by self.fitness value
 def get_fitness_score(elem):
@@ -36,7 +36,7 @@ def bird_function(x,y):
 def fitness_function(population):
     evaluated_pop = []
 
-    for individual in new_population:
+    for individual in start_population:
         x = individual[0]
         y = individual[1]
         fitness_score = bird_function(x, y)
@@ -77,17 +77,36 @@ def mutation_odds(chance):
     odd = randrange(1,100)
     return chance >= odd
 
-def offspring_mutation(offspring):
+def define_offspring_mutation(offspring):
     if(mutation_odds(mutation_chance)):
         mutation_target = rd.randint(len(offspring))
         mutate(offspring[mutation_target])
 
-# WIP
-pop = fitness_function(new_population)
-parents = define_parents(pop)
-new_generation = population_mating(parents)
-offspring_mutation(new_generation)
+def print_generation(gen):
+    print("[{0}]".format('\n'.join(map(str, gen))))
+
+# Iterate over generations
+actual_generation = start_population
+evaluated_population = fitness_function(actual_generation)
+
+for generation in range(num_generations):
+    parents = define_parents(evaluated_population)
+    offspring = population_mating(parents)
+    define_offspring_mutation(offspring)
+
+    actual_generation = offspring
+    evaluated_population = fitness_function(actual_generation)
+
+# best_match_idx = np.where(actual_generation[1] == np.min(actual_generation[1]))
+best_match = min(evaluated_population, key=lambda chromossome: chromossome[1])
+print_generation(evaluated_population)
+print("\n\nBest solution fitness : ", best_match)
+
 
 # GLOBAL MINS
 # (4.70104, 3.15294)
-# (−1.58214, −3.13024)
+# (−1.58214, −3.13024)W
+
+
+
+
